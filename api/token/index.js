@@ -2,6 +2,7 @@ module.exports = async function (context, req) {
   try {
     const secret = process.env.DIRECT_LINE_SECRET;
     if (!secret) {
+      context.log.error('DIRECT_LINE_SECRET is not set');
       context.res = { status: 500, body: 'Missing DIRECT_LINE_SECRET setting' };
       return;
     }
@@ -9,6 +10,8 @@ module.exports = async function (context, req) {
     // Regional base URI (defaults to Europe for West Europe setups).
     const base = (process.env.DIRECT_LINE_BASE_URL || 'https://europe.directline.botframework.com').replace(/\/+$/, '');
     const url = `${base}/v3/directline/tokens/generate`;
+    
+    context.log.info(`Requesting token from: ${url}`);
 
     const https = require('https');
     const { URL } = require('url');
@@ -33,6 +36,7 @@ module.exports = async function (context, req) {
         res.on('data', (chunk) => (data += chunk));
         res.on('end', () => {
           const ok = res.statusCode >= 200 && res.statusCode < 300;
+          context.log.info(`Direct Line response: ${res.statusCode} ${res.statusMessage}`);
           resolve({
             ok,
             status: res.statusCode,
@@ -41,7 +45,10 @@ module.exports = async function (context, req) {
           });
         });
       });
-      r.on('error', reject);
+      r.on('error', (err) => {
+        context.log.error('HTTPS request error:', err);
+        reject(err);
+      });
       r.write(requestBody);
       r.end();
     });
@@ -50,6 +57,9 @@ module.exports = async function (context, req) {
     const debug = req?.query?.debug === '1';
 
     if (!resp.ok) {
+      // Log for Azure diagnostics
+      context.log.error(`Direct Line API error: ${resp.status} ${resp.statusText}`, resp.bodyText);
+      
       if (debug) {
         context.res = {
           status: resp.status,
@@ -76,12 +86,19 @@ module.exports = async function (context, req) {
     }
 
     if (!json?.token) {
+      context.log.error('No token in response:', resp.bodyText);
       context.res = { status: 500, body: `No token in Direct Line response: ${resp.bodyText || '(empty)'}` };
       return;
     }
 
-    context.res = { status: 200, headers: { 'Content-Type': 'application/json' }, body: { token: json.token } };
+    context.log.info('Token generated successfully');
+    context.res = { 
+      status: 200, 
+      headers: { 'Content-Type': 'application/json' }, 
+      body: JSON.stringify({ token: json.token })
+    };
   } catch (e) {
+    context.log.error('Unexpected error:', e);
     context.res = { status: 500, body: e?.message || 'Token server error' };
   }
 }
