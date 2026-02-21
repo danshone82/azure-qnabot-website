@@ -281,15 +281,14 @@ If you receive an answer from your Custom Q&A project, you're ready for the webs
 
 Wait for deployment to complete. Azure will automatically create a GitHub Actions workflow in your repository.
 
-### **B) Add Deployment Token to GitHub**
+**⚠️ IMPORTANT:** Azure creates its own workflow file (e.g., `azure-static-web-apps-xxx.yml`). If your repository already has a `.github/workflows/deploy-swa.yml` file, you can delete it to avoid confusion - Azure's auto-generated workflow will handle deployments.
 
-1.  In Static Web App → **Overview**
-2.  Click **Manage deployment token**
-3.  In GitHub → Secrets → Actions, add:
+### **B) Verify Automatic Deployment**
 
-```
-AZURE_STATIC_WEB_APPS_API_TOKEN = <paste>
-```
+1.  Go to your GitHub repository
+2.  Click **Actions** tab
+3.  You should see a workflow running (created by Azure)
+4.  Wait for it to complete (green checkmark)
 
 ### **C) Add the Direct Line Secret**
 
@@ -307,9 +306,16 @@ DIRECT_LINE_BASE_URL = https://europe.directline.botframework.com
 
 Click **Save**, then **Restart**.
 
-### **D) Deploy**
+### **D) Trigger Deployment**
 
-Push any commit or run **Deploy Static Web App (web + api)** workflow.
+The Static Web App is now configured. To trigger a deployment:
+
+1.  Make any small change to your repository (e.g., edit README.md)
+2.  Commit and push to the `main` branch
+3.  Go to GitHub → **Actions** tab
+4.  Watch the Azure-created workflow run and deploy your site
+
+Alternatively, the initial deployment may have already completed automatically when you created the Static Web App.
 
 ---
 
@@ -418,8 +424,9 @@ DIRECT_LINE_BASE_URL = https://europe.directline.botframework.com
 ### **GitHub Secrets:**
 ```
 AZUREAPPSERVICE_PUBLISHPROFILE = <XML from App Service>
-AZURE_STATIC_WEB_APPS_API_TOKEN = <from Static Web App>
 ```
+
+**Note:** `AZURE_STATIC_WEB_APPS_API_TOKEN` is automatically managed by Azure when you create the Static Web App through the portal.
 
 ### **GitHub Variables:**
 ```
