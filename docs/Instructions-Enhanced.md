@@ -47,16 +47,21 @@ Your repo now contains:
 2.  Click **Create a resource**
 3.  Search for **Language Service**
 4.  Click **Create**
-5.  Use these settings:
+5.  Fill in the **Basics** tab:
 
 | **Setting** | **Value** |
 | --- | --- |
+| Subscription | Your subscription |
+| Resource Group | **qna-rg** (click "Create new" if this is your first resource) |
 | Region | **West Europe** |
-| Pricing Tier | **Free (F0)** |
-| Resource Group | qna-rg (new) |
 | Name | language-qna-&lt;yourname&gt; |
+| Pricing tier | **Free F0** |
 
-6.  Click **Review + Create → Create**
+6.  Check the box: **"By checking this box I acknowledge that I have reviewed and acknowledge the terms in the Responsible AI Notice"**
+7.  Click **Review + create**
+8.  Click **Create**
+
+Wait for deployment to complete (1-2 minutes).
 
 ---
 
@@ -88,17 +93,22 @@ Your knowledge base is now ready.
 1.  In Azure Portal → **Create a resource**
 2.  Search: **Azure Bot**
 3.  Click **Create**
-4.  Settings:
+4.  Fill in the settings:
 
 | **Setting** | **Value** |
 | --- | --- |
 | Bot handle | qna-bot-&lt;yourname&gt; |
 | Subscription | Your subscription |
-| Resource Group | qna-rg |
-| App type | **Single Tenant** |
-| Region | **West Europe** |
+| Resource Group | **qna-rg** (same as before) |
+| Pricing tier | **Free (F0)** |
+| Type of App | **Single Tenant** |
+| Creation type | **Create new Microsoft App ID** |
+| App ID | (auto-generated) |
 
-5.  Click **Review + Create → Create**
+5.  Click **Review + create**
+6.  Click **Create**
+
+Wait for deployment to complete. After creation, note down the **Microsoft App ID** from the Configuration page (you'll need it later).
 
 ---
 
@@ -109,8 +119,8 @@ Your knowledge base is now ready.
 1.  Open your Azure Bot resource
 2.  Go to **Channels**
 3.  Click **Direct Line**
-4.  Click **Enable**
-5.  Copy the **Secret** (we will use it soon)
+4.  Click **Default Site**
+5.  Copy one of the **Secret keys** (we will use it soon)
 
 **⚠️ Never expose this secret in frontend code.**
 
@@ -122,28 +132,35 @@ Your knowledge base is now ready.
 
 ### **Summary**
 
-| **Sub‑Step** | **What You're Doing** | **Why It Matters** |
-| --- | --- | --- |
-| **A) Create App Service** | Hosting your bot code online | Gives your bot a URL and place to run |
-| **B) Add Environment Variables** | Providing IDs, secrets, and endpoints | Allows the bot to authenticate and call your Q&A knowledge |
-| **C) Configure Messaging Endpoint** | Connecting Azure Bot → App Service | Azure must know where your bot lives |
-| **D) GitHub Deployment** | Setting up auto‑deployment | Keeps your bot code updated automatically |
+| **Sub‑Step**                        | **What You're Doing**                 | **Why It Matters**                                         |
+| -------------------------------------| ---------------------------------------| ------------------------------------------------------------|
+| **A) Create App Service**           | Hosting your bot code online          | Gives your bot a URL and place to run                      |
+| **B) Add Environment Variables**    | Providing IDs, secrets, and endpoints | Allows the bot to authenticate and call your Q&A knowledge |
+| **C) Configure Messaging Endpoint** | Connecting Azure Bot → App Service    | Azure must know where your bot lives                       |
+| **D) GitHub Deployment**            | Setting up auto‑deployment            | Keeps your bot code updated automatically                  |
 
 ### **A) Create the App Service**
 
 1.  Azure Portal → **Create a resource**
 2.  Search: **Web App**
-3.  Settings:
+3.  Click **Create**
+4.  Fill in the **Basics** tab:
 
 | **Setting** | **Value** |
 | --- | --- |
+| Subscription | Your subscription |
+| Resource Group | **qna-rg** (same as before) |
 | Name | qna-botapp-&lt;yourname&gt; |
-| Publish | Code |
-| Runtime | **Node 18 LTS** (or Node 20/24) |
-| Region | West Europe |
-| Pricing | Free F1 |
+| Publish | **Code** |
+| Runtime stack | **Node 18 LTS** (or Node 20/24) |
+| Operating System | **Linux** |
+| Region | **West Europe** |
 
-4.  Click **Create**
+5.  Click **Review + create**
+6.  On the pricing plan screen, select **Free F1** (or it may auto-select based on your subscription)
+7.  Click **Create**
+
+Wait for deployment to complete (1-2 minutes).
 
 ### **B) Configure Environment Variables**
 
@@ -233,18 +250,36 @@ If you receive an answer from your Custom Q&A project, you're ready for the webs
 
 ### **A) Create Static Web App**
 
-1.  Azure Portal → Create resource
-2.  Search **Static Web App**
-3.  Create with:
+1.  Azure Portal → **Create a resource**
+2.  Search: **Static Web App**
+3.  Click **Create**
+4.  Fill in the **Basics** tab:
 
 | **Setting** | **Value** |
 | --- | --- |
+| Subscription | Your subscription |
+| Resource Group | **qna-rg** (same as before) |
 | Name | qna-swa-&lt;yourname&gt; |
-| Plan | Free |
-| Region | West Europe |
-| Source | GitHub |
-| App location | /web |
-| Api location | /api |
+| Plan type | **Free** |
+| Region | **West Europe** |
+
+5.  Under **Deployment details**:
+   - Source: **GitHub**
+   - Sign in to GitHub if prompted
+   - Organization: Your GitHub username
+   - Repository: **azure-qna-chatbot** (or your repo name)
+   - Branch: **main**
+
+6.  Under **Build Details**:
+   - Build Presets: **Custom**
+   - App location: **/web**
+   - Api location: **/api**
+   - Output location: **/** (leave as default)
+
+7.  Click **Review + create**
+8.  Click **Create**
+
+Wait for deployment to complete. Azure will automatically create a GitHub Actions workflow in your repository.
 
 ### **B) Add Deployment Token to GitHub**
 
