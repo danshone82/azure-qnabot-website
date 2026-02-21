@@ -6,16 +6,10 @@ export default async function (context, req) {
       return;
     }
 
-    // Allow an optional base URL for regional Direct Line endpoints.
-    // Default to the Europe endpoint since your resources are in West Europe.
-    // Docs (global + regional base URIs): https://learn.microsoft.com/en-us/azure/bot-service/rest-api/bot-framework-rest-direct-line-3-0-api-reference?view=azure-bot-service-4.0  [1](https://stackoverflow.com/questions/43462995/msal-azure-mobileservice-and-auto-rest-calls-get-401-unauthorized)
+    // Regional base URI (defaults to Europe for West Europe setups).
     const base = (process.env.DIRECT_LINE_BASE_URL || 'https://europe.directline.botframework.com').replace(/\/+$/, '');
     const url = `${base}/v3/directline/tokens/generate`;
 
-    // (Safe) log
-    if (context.log?.info) context.log.info('Requesting Direct Line token', { url, hasSecret: true });
-
-    // Use https request
     const https = await import('https');
     const { URL } = await import('url');
     const u = new URL(url);
@@ -27,14 +21,14 @@ export default async function (context, req) {
       port: u.port || 443,
       path: u.pathname + u.search,
       headers: {
-        Authorization: `Bearer ${secret}`, // Use your Direct Line **secret** server-side to mint a short-lived token  [2](https://learn.microsoft.com/en-us/answers/questions/692461/message-aadsts700016-application-with-identifier-n)
+        Authorization: `Bearer ${secret}`,
         'Content-Type': 'application/json',
         'Content-Length': Buffer.byteLength(requestBody)
       }
     };
 
     const resp = await new Promise((resolve, reject) => {
-      const req2 = https.request(options, (res) => {
+      const r = https.request(options, (res) => {
         let data = '';
         res.on('data', (chunk) => (data += chunk));
         res.on('end', () => {
@@ -43,30 +37,51 @@ export default async function (context, req) {
             ok,
             status: res.statusCode,
             statusText: res.statusMessage,
-            text: async () => data,
-            json: async () => {
-              try { return JSON.parse(data); } catch { return data; }
-            }
+            bodyText: data
           });
         });
       });
-      req2.on('error', reject);
-      req2.write(requestBody);
-      req2.end();
+      r.on('error', reject);
+      r.write(requestBody);
+      r.end();
     });
 
+    // Debug mode: return EXACT upstream body/status so we can see what's happening
+    const debug = req?.query?.debug === '1';
+
     if (!resp.ok) {
-      let respBody = '';
-      try { respBody = await resp.text(); } catch { /* ignore */ }
-      if (context.log?.error) context.log.error('Direct Line token error', { url, status: resp.status, body: respBody });
-      context.res = { status: 500, body: `Direct Line token error: ${resp.status} ${resp.statusText} - ${respBody}` };
+      if (debug) {
+        context.res = {
+          status: resp.status,
+          headers: { 'Content-Type': 'text/plain' },
+          body: resp.bodyText || '(empty upstream body)'
+        };
+      } else {
+        context.res = {
+          status: 500,
+          headers: { 'Content-Type': 'text/plain' },
+          body: `Direct Line token error: ${resp.status} ${resp.statusText} - ${resp.bodyText || '(no message)'}`
+        };
+      }
       return;
     }
 
-    const json = await resp.json();
+    // Try to parse JSON; if parsing fails, surface the raw text
+    let json;
+    try {
+      json = JSON.parse(resp.bodyText);
+    } catch {
+      context.res = { status: 500, body: `Unexpected Direct Line response: ${resp.bodyText || '(empty)'}` };
+      return;
+    }
+
+    if (!json?.token) {
+      context.res = { status: 500, body: `No token in Direct Line response: ${resp.bodyText || '(empty)'}` };
+      return;
+    }
+
     context.res = { status: 200, headers: { 'Content-Type': 'application/json' }, body: { token: json.token } };
   } catch (e) {
-    if (context.log?.error) context.log.error('Token server exception', e?.message || e);
     context.res = { status: 500, body: e?.message || 'Token server error' };
   }
 }
