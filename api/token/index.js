@@ -7,20 +7,29 @@ export default async function (context, req) {
       return;
     }
 
-    // For regional bots, you may use https://europe.directline.botframework.com
-    const resp = await fetch('https://directline.botframework.com/v3/directline/tokens/generate', {
+    // Allow an optional base URL for regional Direct Line endpoints (e.g. https://europe.directline.botframework.com)
+    const base = (process.env.DIRECT_LINE_BASE_URL || 'https://directline.botframework.com').replace(/\/+$/, '');
+    const url = `${base}/v3/directline/tokens/generate`;
+
+    const resp = await fetch(url, {
       method: 'POST',
-      headers: { Authorization: `Bearer ${secret}` }
+      headers: { Authorization: `Bearer ${secret}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({})
     });
 
     if (!resp.ok) {
-      context.res = { status: 500, body: `Direct Line token error: ${resp.status} ${resp.statusText}` };
+      // Try to surface response body for easier debugging
+      let respBody = '';
+      try { respBody = await resp.text(); } catch (e) { respBody = ''; }
+      context.log && context.log.error && context.log.error('Direct Line token error', { url, status: resp.status, body: respBody });
+      context.res = { status: 500, body: `Direct Line token error: ${resp.status} ${resp.statusText} - ${respBody}` };
       return;
     }
 
     const json = await resp.json();
     context.res = { status: 200, headers: { 'Content-Type': 'application/json' }, body: { token: json.token } };
   } catch (e) {
+    context.log && context.log.error && context.log.error('Token server exception', e?.message || e);
     context.res = { status: 500, body: e?.message || 'Token server error' };
   }
 }
