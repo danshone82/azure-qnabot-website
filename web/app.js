@@ -19,7 +19,10 @@ if (themeToggle) {
 
     window.WebChat.renderWebChat(
       {
-        directLine: window.WebChat.createDirectLine({ token }),
+        directLine: window.WebChat.createDirectLine({ 
+          token,
+          domain: 'https://europe.directline.botframework.com/v3/directline'
+        }),
         styleOptions: { accent: '#60a5fa', hideUploadButton: true, botAvatarInitials: 'AI', userAvatarInitials: 'You' }
       },
       document.getElementById('webchat')
