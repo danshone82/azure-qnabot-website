@@ -11,7 +11,7 @@ This template deploys:
 - Azure subscription (free tier OK)
 - **Language resource** with **Custom Question Answering** and a deployed project (West Europe recommended)
 - **Azure Bot** resource (enable **Direct Line** channel)
-- **App Service (Linux, Node 18)** to host the bot
+- **App Service (Linux, Node 24)** to host the bot
 
 > Direct Line tokens are minted server-side (\`/api/token\`) using the Direct Line secret; the browser never sees the secret. Tokens are short-lived and scoped to a single conversation. See Microsoft docs for **Direct Line** and **authentication**. 
 
@@ -26,7 +26,7 @@ This template deploys:
 
 ## 2) Deploy the Bot
 
-1. Create **App Service (Linux)**, Node 18.
+1. Create **App Service (Linux)**, Node 24.
 2. In **Configuration → Application settings**, add:
    - `MicrosoftAppId = <Bot appId>`
    - `MicrosoftAppPassword = <client secret>`

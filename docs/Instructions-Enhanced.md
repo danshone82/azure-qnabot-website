@@ -152,7 +152,7 @@ Wait for deployment to complete. After creation, note down the **Microsoft App I
 | Resource Group | **qna-rg** (same as before) |
 | Name | qna-botapp-&lt;yourname&gt; |
 | Publish | **Code** |
-| Runtime stack | **Node 18 LTS** (or Node 20/24) |
+| Runtime stack | **Node 24 LTS** |
 | Operating System | **Linux** |
 | Region | **West Europe** |
 
