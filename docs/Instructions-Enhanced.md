@@ -185,7 +185,7 @@ Click **Save**.
 
 1. **Get Publish Profile (XML)** - This is a credential file that GitHub Actions uses to deploy securely.
 2. **Add it as a GitHub Secret** - This hides it safely inside GitHub.
-3. **Add your App Service name as a secret** - This tells GitHub which App Service to deploy to without hardcoding it.
+3. **Add your App Service name as a variable** - This tells GitHub which App Service to deploy to.
 4. **Push code or run the workflow** - GitHub Actions uploads the bot code to your App Service automatically.
 
 **Instructions:**
@@ -193,14 +193,19 @@ Click **Save**.
 1.  In App Service → **Overview**, click **Get Publish Profile**
 2.  Download the XML file
 3.  In GitHub → go to **Settings → Secrets and Variables → Actions**
-4.  Create TWO secrets:
+4.  Under the **Secrets** tab, create:
 
 ```
 AZUREAPPSERVICE_PUBLISHPROFILE = <paste entire XML here>
+```
+
+5.  Click the **Variables** tab, then **New repository variable**:
+
+```
 BOT_WEBAPP_NAME = qna-botapp-<yourname>
 ```
 
-5.  Push a commit or manually run the workflow.
+6.  Push a commit or manually run the workflow.
 
 Your bot deploys automatically.
 
@@ -378,6 +383,10 @@ DIRECT_LINE_BASE_URL = https://europe.directline.botframework.com
 ### **GitHub Secrets:**
 ```
 AZUREAPPSERVICE_PUBLISHPROFILE = <XML from App Service>
-BOT_WEBAPP_NAME = qna-botapp-<yourname>
 AZURE_STATIC_WEB_APPS_API_TOKEN = <from Static Web App>
+```
+
+### **GitHub Variables:**
+```
+BOT_WEBAPP_NAME = qna-botapp-<yourname>
 ```

@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 env:
-  BOT_WEBAPP_NAME: ${{ secrets.BOT_WEBAPP_NAME }}
+  BOT_WEBAPP_NAME: ${{ vars.BOT_WEBAPP_NAME }}
 
 jobs:
   build_and_deploy:
