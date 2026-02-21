@@ -11,6 +11,9 @@ export default async function (context, req) {
     const base = (process.env.DIRECT_LINE_BASE_URL || 'https://directline.botframework.com').replace(/\/+$/, '');
     const url = `${base}/v3/directline/tokens/generate`;
 
+    // Log the URL we will call and whether a secret is present (do NOT log the secret value)
+    context.log && context.log.info && context.log.info('Requesting Direct Line token', { url, hasSecret: !!secret });
+
     const resp = await fetch(url, {
       method: 'POST',
       headers: { Authorization: `Bearer ${secret}`, 'Content-Type': 'application/json' },
