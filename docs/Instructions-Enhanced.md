@@ -95,7 +95,7 @@ Your knowledge base is now ready.
 | Bot handle | qna-bot-&lt;yourname&gt; |
 | Subscription | Your subscription |
 | Resource Group | qna-rg |
-| App type | Multi‑tenant |
+| App type | **Single Tenant** |
 | Region | **West Europe** |
 
 5.  Click **Review + Create → Create**
