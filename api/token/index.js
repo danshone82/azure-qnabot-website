@@ -14,10 +14,31 @@ export default async function (context, req) {
     // Log the URL we will call and whether a secret is present (do NOT log the secret value)
     context.log && context.log.info && context.log.info('Requesting Direct Line token', { url, hasSecret: !!secret });
 
-    const resp = await fetch(url, {
+    // Use native https request instead of global fetch to avoid runtime incompatibilities
+    const https = await import('https');
+    const { URL } = await import('url');
+    const u = new URL(url);
+
+    const requestBody = JSON.stringify({});
+    const options = {
       method: 'POST',
-      headers: { Authorization: `Bearer ${secret}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({})
+      hostname: u.hostname,
+      port: u.port || 443,
+      path: u.pathname + u.search,
+      headers: { Authorization: `Bearer ${secret}`, 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(requestBody) }
+    };
+
+    const resp = await new Promise((resolve, reject) => {
+      const req = https.request(options, (res) => {
+        let data = '';
+        res.on('data', (chunk) => (data += chunk));
+        res.on('end', () => {
+          resolve({ status: res.statusCode, statusText: res.statusMessage, text: async () => data, json: async () => { try { return JSON.parse(data); } catch { return data; } } });
+        });
+      });
+      req.on('error', reject);
+      req.write(requestBody);
+      req.end();
     });
 
     if (!resp.ok) {
