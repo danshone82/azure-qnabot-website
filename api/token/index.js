@@ -1,4 +1,3 @@
-
 export default async function (context, req) {
   try {
     const secret = process.env.DIRECT_LINE_SECRET;
@@ -7,14 +6,16 @@ export default async function (context, req) {
       return;
     }
 
-    // Allow an optional base URL for regional Direct Line endpoints (e.g. https://europe.directline.botframework.com)
+    // Allow an optional base URL for regional Direct Line endpoints.
+    // Default to the Europe endpoint since your resources are in West Europe.
+    // Docs (global + regional base URIs): https://learn.microsoft.com/en-us/azure/bot-service/rest-api/bot-framework-rest-direct-line-3-0-api-reference?view=azure-bot-service-4.0  [1](https://stackoverflow.com/questions/43462995/msal-azure-mobileservice-and-auto-rest-calls-get-401-unauthorized)
     const base = (process.env.DIRECT_LINE_BASE_URL || 'https://europe.directline.botframework.com').replace(/\/+$/, '');
     const url = `${base}/v3/directline/tokens/generate`;
 
-    // Log the URL we will call and whether a secret is present (do NOT log the secret value)
-    context.log && context.log.info && context.log.info('Requesting Direct Line token', { url, hasSecret: !!secret });
+    // (Safe) log
+    if (context.log?.info) context.log.info('Requesting Direct Line token', { url, hasSecret: true });
 
-    // Use native https request instead of global fetch to avoid runtime incompatibilities
+    // Use https request
     const https = await import('https');
     const { URL } = await import('url');
     const u = new URL(url);
@@ -25,27 +26,39 @@ export default async function (context, req) {
       hostname: u.hostname,
       port: u.port || 443,
       path: u.pathname + u.search,
-      headers: { Authorization: `Bearer ${secret}`, 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(requestBody) }
+      headers: {
+        Authorization: `Bearer ${secret}`, // Use your Direct Line **secret** server-side to mint a short-lived token  [2](https://learn.microsoft.com/en-us/answers/questions/692461/message-aadsts700016-application-with-identifier-n)
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(requestBody)
+      }
     };
 
     const resp = await new Promise((resolve, reject) => {
-      const req = https.request(options, (res) => {
+      const req2 = https.request(options, (res) => {
         let data = '';
         res.on('data', (chunk) => (data += chunk));
         res.on('end', () => {
-          resolve({ status: res.statusCode, statusText: res.statusMessage, text: async () => data, json: async () => { try { return JSON.parse(data); } catch { return data; } } });
+          const ok = res.statusCode >= 200 && res.statusCode < 300;
+          resolve({
+            ok,
+            status: res.statusCode,
+            statusText: res.statusMessage,
+            text: async () => data,
+            json: async () => {
+              try { return JSON.parse(data); } catch { return data; }
+            }
+          });
         });
       });
-      req.on('error', reject);
-      req.write(requestBody);
-      req.end();
+      req2.on('error', reject);
+      req2.write(requestBody);
+      req2.end();
     });
 
     if (!resp.ok) {
-      // Try to surface response body for easier debugging
       let respBody = '';
-      try { respBody = await resp.text(); } catch (e) { respBody = ''; }
-      context.log && context.log.error && context.log.error('Direct Line token error', { url, status: resp.status, body: respBody });
+      try { respBody = await resp.text(); } catch { /* ignore */ }
+      if (context.log?.error) context.log.error('Direct Line token error', { url, status: resp.status, body: respBody });
       context.res = { status: 500, body: `Direct Line token error: ${resp.status} ${resp.statusText} - ${respBody}` };
       return;
     }
@@ -53,7 +66,7 @@ export default async function (context, req) {
     const json = await resp.json();
     context.res = { status: 200, headers: { 'Content-Type': 'application/json' }, body: { token: json.token } };
   } catch (e) {
-    context.log && context.log.error && context.log.error('Token server exception', e?.message || e);
+    if (context.log?.error) context.log.error('Token server exception', e?.message || e);
     context.res = { status: 500, body: e?.message || 'Token server error' };
   }
 }
