@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 env:
-  BOT_WEBAPP_NAME: qna-botapp-200882
+  BOT_WEBAPP_NAME: ${{ secrets.BOT_WEBAPP_NAME }}
 
 jobs:
   build_and_deploy:
