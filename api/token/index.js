@@ -8,7 +8,7 @@ export default async function (context, req) {
     }
 
     // Allow an optional base URL for regional Direct Line endpoints (e.g. https://europe.directline.botframework.com)
-    const base = (process.env.DIRECT_LINE_BASE_URL || 'https://directline.botframework.com').replace(/\/+$/, '');
+    const base = (process.env.DIRECT_LINE_BASE_URL || 'https://europe.directline.botframework.com').replace(/\/+$/, '');
     const url = `${base}/v3/directline/tokens/generate`;
 
     // Log the URL we will call and whether a secret is present (do NOT log the secret value)
