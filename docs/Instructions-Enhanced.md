@@ -304,7 +304,9 @@ DIRECT_LINE_BASE_URL = https://europe.directline.botframework.com
 
 **⚠️ IMPORTANT:** The `DIRECT_LINE_BASE_URL` setting is critical! Without it, you'll get 403 errors because the token region won't match the WebChat endpoint.
 
-Click **Save**, then **Restart**.
+3.  Click **Save**
+
+The configuration changes will be applied automatically. The API functions will use these settings on the next request.
 
 ### **D) Trigger Deployment**
 
