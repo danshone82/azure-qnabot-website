@@ -1,4 +1,4 @@
-export default async function (context, req) {
+module.exports = async function (context, req) {
   try {
     const secret = process.env.DIRECT_LINE_SECRET;
     if (!secret) {
@@ -10,8 +10,8 @@ export default async function (context, req) {
     const base = (process.env.DIRECT_LINE_BASE_URL || 'https://europe.directline.botframework.com').replace(/\/+$/, '');
     const url = `${base}/v3/directline/tokens/generate`;
 
-    const https = await import('https');
-    const { URL } = await import('url');
+    const https = require('https');
+    const { URL } = require('url');
     const u = new URL(url);
 
     const requestBody = JSON.stringify({});
