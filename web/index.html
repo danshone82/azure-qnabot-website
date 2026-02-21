@@ -1,0 +1,37 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Azure Q&A Chatbot</title>
+  <meta name="description" content="Chat UI + Web Chat for Azure Bot + Custom Q&A." />
+
+  <link rel="stylesheet" href="./styles.css" />
+  <script src="https://cdn.botframework.com/botframework-webchat/latest/webchat.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <h1>Azure Q&amp;A Chatbot</h1>
+      <p class="tagline">Ask questions about your PDF/FAQ knowledge base.</p>
+      <button id="themeToggle" class="btn btn-outline">Toggle theme</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="chat-card" aria-label="Chat with the bot">
+      <div id="webchat" role="main" aria-live="polite"></div>
+      <noscript>Please enable JavaScript to use the chat.</noscript>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <small>© <span id="year"></span> Your Team • Azure Static Web Apps + Azure Bot Service</small>
+    </div>
+  </footer>
+
+  <script src="./app.js"></script>
+</body>
+</html>

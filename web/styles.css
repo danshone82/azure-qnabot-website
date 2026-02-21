@@ -1,0 +1,19 @@
+
+:root {
+  --bg: #0b0f17;
+  --elev: #111827;
+  --text: #e5e7eb;
+  --muted: #94a3b8;
+  --accent: #60a5fa;
+  --border: #1f2937;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; background: var(--bg); color: var(--text); }
+.container { width: min(1100px, 100%); margin: 0 auto; padding: 0 16px; }
+.site-header { border-bottom: 1px solid var(--border); background: linear-gradient(180deg, rgba(96,165,250,0.08), transparent); }
+.site-header .container { display: flex; align-items: center; gap: 16px; padding: 20px 16px; flex-wrap: wrap; }
+.btn { border: 1px solid var(--border); background: transparent; color: var(--text); border-radius: 999px; padding: 8px 14px; cursor: pointer; }
+.btn:hover { border-color: var(--accent); color: var(--accent); }
+.chat-card { margin: 24px 0; background: var(--elev); border: 1px solid var(--border); border-radius: 12px; min-height: 60vh; overflow: hidden; }
+#webchat { min-height: 60vh; }
+.site-footer { border-top: 1px solid var(--border); padding: 16px 0 48px; color: var(--muted); }

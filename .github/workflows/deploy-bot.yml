@@ -1,0 +1,36 @@
+
+name: Deploy Bot (App Service)
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "bot/**"
+  workflow_dispatch:
+
+env:
+  BOT_WEBAPP_NAME: your-bot-webapp-name
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: bot
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Install
+        run: npm ci
+      - name: Zip artifact
+        run: |
+          zip -r ../bot.zip ./*
+      - name: Deploy to App Service using Publish Profile
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.BOT_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
+          package: ./bot.zip

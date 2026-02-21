@@ -1,0 +1,17 @@
+{
+  "name": "cqa-forwarder-bot",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "botbuilder": "^4.22.2",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2"
+  }
+}
