@@ -56,6 +56,29 @@ class CQABot extends ActivityHandler {
         });
 
         if (!resp.ok) {
+          // If we get 404, try the alternative prediction URL format used by some Language resources
+          if (resp.status === 404) {
+            const altUrl = `${endpoint}/language/:query-knowledgebases?projectName=${encodeURIComponent(project)}&deploymentName=${encodeURIComponent(deployment)}&api-version=2021-10-01`;
+            console.warn('Primary CQA URL returned 404, retrying with alternative URL format', { primary: url, alternative: altUrl });
+            const resp2 = await fetch(altUrl, {
+              method: 'POST',
+              headers,
+              body: JSON.stringify(body)
+            });
+
+            if (!resp2.ok) {
+              const respText2 = await resp2.text();
+              console.error('CQA retry failed', { url: altUrl, status: resp2.status, statusText: resp2.statusText, body: respText2 });
+              await context.sendActivity(`CQA error: ${resp2.status} ${resp2.statusText} - ${respText2 ? respText2.slice(0,200) : ''}`);
+              return;
+            }
+
+            const data2 = await resp2.json();
+            const topAnswer2 = data2?.answers?.[0]?.answer || data2?.answers?.[0]?.answerText || "Sorry, I couldn't find an answer.";
+            await context.sendActivity(topAnswer2);
+            return;
+          }
+
           // Capture response body for debugging (trim to avoid huge messages)
           const respText = await resp.text();
           console.error('CQA request failed', { url, status: resp.status, statusText: resp.statusText, body: respText });
